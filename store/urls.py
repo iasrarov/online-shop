@@ -5,16 +5,16 @@ from . views import (
     store,
     updateItem,
     processOrder,
-    loginPage,
-    registerPage,
+    login,
+    register,
 )
 
 urlpatterns = [
-    path('register/', registerPage, name='register'),
-    path('login/', loginPage, name='login'),
+    path('register/', register, name='register'),
+    path('login/', login, name='login'),
     path('cart/', cart, name='cart'),
     path('checkout/', checkout, name='checkout'),
-    path('store/', store, name='store'),
+    path('', store, name='store'),
     path('update_item/', updateItem, name='update_item'),
     path('process_order/', processOrder, name='process_order'),
 ]

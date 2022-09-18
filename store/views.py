@@ -1,44 +1,90 @@
 import datetime
 import json
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
-
-from .forms import CreateUserForm
+from django.shortcuts import render, redirect, HttpResponse
+# from .forms import CreateUserForm
 from .models import *
 from .utils import cartData, guestOrder
+from django.contrib.auth import login, authenticate
+from .forms import RegisterForm, LoginForm
 
 
-def registerPage(request):
-    form = CreateUserForm()
+def register(request):
     if request.method == 'POST':
-        form = CreateUserForm(request.POST)
+        form = RegisterForm(request.POST)
         if form.is_valid():
-            form.save()
-            user = form.cleaned_data.get('username')
-            messages.success(request, 'Аккаунт был создан для ' + user)
-            return redirect('login')
-    context = {'form': form}
-    return render(request, 'store/register.html', context)
-
-
-def loginPage(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            return redirect('store')
+            password = form.cleaned_data['password']
+            new_user = form.save(commit=False)
+            new_user.set_password(password)
+            new_user.save()
+            return HttpResponse('Account was created!')
         else:
-            messages.info(request, 'Логин или пароль неверен!')
+            return HttpResponse("Invalid")
+    else:
+        form = RegisterForm()
+        print(form)
+    return render(request, 'store/register.html', {'form': form})
 
-    context = {}
-    return render(request, 'store/login.html', context)
+
+def login(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            authenticate(username=username, password=password)
+            return render(request, 'store/store.html', {'user': username})
+        else:
+            return HttpResponse("INVALID")
+    else:
+        form = LoginForm()
+    return render(request, 'store/login.html', {'form': form})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# def registerPage(request):
+#     form = CreateUserForm()
+#     if request.method == 'POST':
+#         form = CreateUserForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             user = form.cleaned_data.get('username')
+#             messages.success(request, 'Аккаунт был создан для ' + user)
+#             return redirect('login')
+#     context = {'form': form}
+#     return render(request, 'store/register.html', context)
+#
+#
+# def loginPage(request):
+#     if request.method == 'POST':
+#         username = request.POST.get('username')
+#         password = request.POST.get('password')
+#
+#         user = authenticate(request, username=username, password=password)
+#
+#         if user is not None:
+#             login(request, user)
+#             return redirect('store')
+#         else:
+#             messages.info(request, 'Логин или пароль неверен!')
+#
+#     context = {}
+#     return render(request, 'store/login.html', context)
 
 
 def logoutUser(request):
